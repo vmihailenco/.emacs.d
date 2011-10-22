@@ -1,6 +1,6 @@
-[submodule "vendor/coffee-mode"]
-	path = vendor/coffee-mode
-	url = /home/vladimir/workspace/coffee-mode/
+[submodule "django-mode"]
+	path = django-mode
+	url = git://github.com/myfreeweb/django-mode.git
 [submodule "vendor/django-mode"]
 	path = vendor/django-mode
 	url = git://github.com/myfreeweb/django-mode.git
@@ -28,3 +28,6 @@
 [submodule "vendor/zenburn-emacs"]
 	path = vendor/zenburn-emacs
 	url = git://github.com/bbatsov/zenburn-emacs.git
+[submodule "vendor/coffee-mode"]
+	path = vendor/coffee-mode
+	url = git://github.com/defunkt/coffee-mode.git

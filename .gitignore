@@ -1,5 +1,6 @@
 %backup%~
 tramp
+.smex-items
 auto-save-list/
 backups/
 build/
@@ -7,4 +8,3 @@ elpa/
 eshell/
 places
 src/
-vendor/
