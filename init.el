@@ -137,16 +137,12 @@
 
 ;===============================================================================
 
-(add-to-list 'load-path "~/.emacs.d/vendor/haml-mode")
 (require 'haml-mode)
-
-(add-to-list 'load-path "~/.emacs.d/vendor/sass-mode")
 (require 'sass-mode)
 
 ;-------------------------------------------------------------------------------
 
 (setq scss-compile-at-save nil)
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/vendor/scss-mode/"))
 (autoload 'scss-mode "scss-mode")
 (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
 (add-hook 'scss-mode
@@ -154,7 +150,6 @@
 
 ;===============================================================================
 
-(add-to-list 'load-path "~/.emacs.d/vendor/coffee-mode")
 (require 'coffee-mode)
 
 ; set tab-width = 2 special for coffeescript
@@ -167,10 +162,8 @@
 
 ;===============================================================================
 
-(add-to-list 'load-path "~/.emacs.d/vendor/yasnippet-0.6.1c")
 (require 'yasnippet)
 (yas/initialize)
-(yas/load-directory "~/.emacs.d/vendor/yasnippet-0.6.1c/snippets")
 
 ;===============================================================================
 
@@ -182,7 +175,6 @@
 
 ;===============================================================================
 
-(add-to-list 'load-path "~/.emacs.d/vendor/zenburn-emacs")
 (require 'color-theme-zenburn)
 (color-theme-zenburn)
 
@@ -206,3 +198,29 @@
 (autoload 'ack "full-ack" nil t)
 (autoload 'ack-find-same-file "full-ack" nil t)
 (autoload 'ack-find-file "full-ack" nil t)
+
+;===============================================================================
+
+(when (not package-archive-contents)
+  (package-refresh-contents))
+
+;; Add in your own as you wish:
+(defvar my-packages '(
+                      starter-kit
+                      starter-kit-lisp
+                      starter-kit-js
+                      starter-kit-bindings
+                      starter-kit-eshell
+                      color-theme-zenburn
+                      coffee-mode
+                      flymake-coffee
+                      sass-mode
+                      scss-mode
+                      yasnippet
+                      full-ack
+                      )
+  "A list of packages to ensure are installed at launch.")
+
+(dolist (p my-packages)
+  (when (not (package-installed-p p))
+    (package-install p)))
