@@ -5,6 +5,9 @@
 
 ;===============================================================================
 
+(setq tab-width 4)
+(setq default-tab-width 4)
+(setq auto-save-default nil)
 (set-default-font "Consolas-11")
 
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
@@ -13,28 +16,25 @@
 (setq-default whitespace-line-column 80)
 (global-whitespace-mode t)
 
+;; disable auto wrapping
 (add-hook 'html-mode-hook '(lambda () (auto-fill-mode 0)))
 
 ;===============================================================================
 
-; FFAP mode replaces certain key bindings for finding files, including C-x C-f,
-; with commands that provide more sensitive defaults. These commands behave
-; like the ordinary ones when given a prefix argument. Otherwise, they get the
-; default file name or URL from the text around point. If what is found in the
-; buffer has the form of a URL rather than a file name, the commands use
-; browse-url to view it.
-
-(ffap-bindings)
-
-;===============================================================================
-
-; Ido is part of Emacs, starting with release 22.
-;
-; The ido.el package by KimStorm lets you interactively do things with buffers
-; and files.
-
-(require 'ido)
-(setq uniquify-buffer-name-style 'post-forward)
+;; automatically save buffers associated with files on buffer switch
+;; and on windows switch
+(defadvice switch-to-buffer (before save-buffer-now activate)
+  (when buffer-file-name (save-buffer)))
+(defadvice other-window (before other-window-now activate)
+  (when buffer-file-name (save-buffer)))
+(defadvice windmove-up (before other-window-now activate)
+  (when buffer-file-name (save-buffer)))
+(defadvice windmove-down (before other-window-now activate)
+  (when buffer-file-name (save-buffer)))
+(defadvice windmove-left (before other-window-now activate)
+  (when buffer-file-name (save-buffer)))
+(defadvice windmove-right (before other-window-now activate)
+  (when buffer-file-name (save-buffer)))
 
 ;===============================================================================
 
@@ -52,8 +52,10 @@
 
 ;===============================================================================
 
-;(add-to-list 'load-path "~/go/misc/emacs")
-;(require 'go-mode-load)
+(add-to-list 'load-path "~/workspace/go/misc/emacs")
+(require 'go-mode-load)
+
+(add-hook 'before-save-hook #'gofmt-before-save)
 
 ;===============================================================================
 
@@ -169,18 +171,6 @@
 
 (require 'color-theme-zenburn)
 (color-theme-zenburn)
-
-;===============================================================================
-
-(require 'dired-x)
-(setq dired-omit-files
-      (rx (or (seq ".pyc" eol))))
-(setq dired-omit-extensions
-      (append dired-latex-unclean-extensions
-              dired-bibtex-unclean-extensions
-              dired-texinfo-unclean-extensions))
-(add-hook 'dired-mode-hook (lambda () (dired-omit-mode 1)))
-(put 'dired-find-alternate-file 'disabled nil)
 
 ;===============================================================================
 
