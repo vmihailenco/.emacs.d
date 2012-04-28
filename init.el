@@ -3,6 +3,34 @@
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (package-initialize)
 
+;;
+
+(when (not package-archive-contents)
+  (package-refresh-contents))
+
+;; Add in your own as you wish:
+(defvar my-packages '(
+                      starter-kit
+                      starter-kit-lisp
+                      starter-kit-js
+                      starter-kit-bindings
+                      starter-kit-eshell
+                      color-theme
+                      color-theme-zenburn
+                      twilight-theme
+                      coffee-mode
+                      flymake-coffee
+                      sass-mode
+                      scss-mode
+                      yasnippet
+                      full-ack
+                      )
+  "A list of packages to ensure are installed at launch.")
+
+(dolist (p my-packages)
+  (when (not (package-installed-p p))
+    (package-install p)))
+
 ;===============================================================================
 
 (setq tab-width 4)
@@ -66,6 +94,7 @@
 (autoload 'pymacs-eval "pymacs" nil t)
 (autoload 'pymacs-exec "pymacs" nil t)
 (autoload 'pymacs-load "pymacs" nil t)
+(autoload 'pymacs-autoload "pymacs")
 
 ;-------------------------------------------------------------------------------
 
@@ -180,29 +209,3 @@
 (autoload 'ack "full-ack" nil t)
 (autoload 'ack-find-same-file "full-ack" nil t)
 (autoload 'ack-find-file "full-ack" nil t)
-
-;===============================================================================
-
-(when (not package-archive-contents)
-  (package-refresh-contents))
-
-;; Add in your own as you wish:
-(defvar my-packages '(
-                      starter-kit
-                      starter-kit-lisp
-                      starter-kit-js
-                      starter-kit-bindings
-                      starter-kit-eshell
-                      color-theme-zenburn
-                      coffee-mode
-                      flymake-coffee
-                      sass-mode
-                      scss-mode
-                      yasnippet
-                      full-ack
-                      )
-  "A list of packages to ensure are installed at launch.")
-
-(dolist (p my-packages)
-  (when (not (package-installed-p p))
-    (package-install p)))
