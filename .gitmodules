@@ -7,3 +7,6 @@
 [submodule "vendor/python.el.d"]
 	path = vendor/python.el.d
 	url = git://github.com/fgallina/python.el.git
+[submodule "vendor/go-mode.el"]
+	path = vendor/go-mode.el
+	url = git://github.com/dominikh/go-mode.el.git

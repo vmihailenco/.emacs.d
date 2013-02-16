@@ -15,15 +15,19 @@
                       starter-kit-js
                       starter-kit-bindings
                       starter-kit-eshell
-                      color-theme
-                      color-theme-zenburn
-                      twilight-theme
+
+                      zenburn-theme
+
                       coffee-mode
                       flymake-coffee
                       sass-mode
                       scss-mode
+                      less-css-mode
+
                       yasnippet
                       full-ack
+                      expand-region
+                      autopair
                       )
   "A list of packages to ensure are installed at launch.")
 
@@ -31,7 +35,7 @@
   (when (not (package-installed-p p))
     (package-install p)))
 
-;===============================================================================
+;-------------------------------------------------------------------------------
 
 (setq tab-width 4)
 (setq default-tab-width 4)
@@ -47,7 +51,7 @@
 ;; disable auto wrapping
 (add-hook 'html-mode-hook '(lambda () (auto-fill-mode 0)))
 
-;===============================================================================
+;-------------------------------------------------------------------------------
 
 ;; automatically save buffers associated with files on buffer switch
 ;; and on windows switch
@@ -64,28 +68,36 @@
 (defadvice windmove-right (before other-window-now activate)
   (when buffer-file-name (save-buffer)))
 
-;===============================================================================
+;;------------------------------------------------------------------------------
+
+(require 'expand-region)
+(global-set-key (kbd "C-=") 'er/expand-region)
+
+;;------------------------------------------------------------------------------
 
 (add-to-list 'load-path "~/.emacs.d/vendor/projutils.el.d")
 (require 'projutils)
 (projutils-global-mode 1)
-(setq projutils-grep-use-ack 1)
+(setq projutils-grep-use-ack nil)
 (setq-default projutils-ffip-allowed-file-extensions
-              '("txt" "py" "html" "js" "css" "coffee" "sass"))
+              '("txt" "py" "html" "js" "css" "coffee" "sass" "scss" "less" "go"))
 
-;===============================================================================
+;;------------------------------------------------------------------------------
 
 (require 'autopair)
 (autopair-global-mode)
 
-;===============================================================================
+;;------------------------------------------------------------------------------
 
-(add-to-list 'load-path "~/workspace/go/misc/emacs")
-(require 'go-mode-load)
+(add-to-list 'load-path "~/.emacs.d/vendor/go-mode.el")
+(require 'go-mode)
 
 (add-hook 'before-save-hook #'gofmt-before-save)
 
-;===============================================================================
+(add-to-list 'load-path "~/workspace/gocode/src/github.com/dougm/goflymake")
+(require 'go-flymake)
+
+;;------------------------------------------------------------------------------
 
 (add-to-list 'load-path "~/.emacs.d/vendor/Pymacs")
 
@@ -96,12 +108,12 @@
 (autoload 'pymacs-load "pymacs" nil t)
 (autoload 'pymacs-autoload "pymacs")
 
-;-------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
 
-(require 'pymacs)
-(pymacs-load "ropemacs" "rope-")
+;; (require 'pymacs)
+;; (pymacs-load "ropemacs" "rope-")
 
-;-------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
 
 (add-to-list 'load-path "~/.emacs.d/vendor/python.el.d")
 (require 'python)
@@ -118,7 +130,7 @@
 (add-hook 'python-mode-hook 'esk-add-watchwords)
 (add-hook 'python-mode-hook 'esk-turn-on-idle-highlight-mode)
 
-;-------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
 
 ; Flymake is implemented as an Emacs minor mode. It runs the syntax check tool
 ; (the compiler for C++ files, perl for perl files, etc.) in the background,
@@ -146,32 +158,16 @@
             (local-set-key [f2] 'flymake-goto-prev-error)
             (local-set-key [f3] 'flymake-goto-next-error)))
 
-;==============================================================================
+;;----------------------------------------------------------------------------=
 
-(when (load "flymake" t)
-  (defun flymake-csscheckers-init ()
-    (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))
-           (local-file (file-relative-name
-                        temp-file
-                        (file-name-directory buffer-file-name))))
-      (list "~/.emacs.d/bin/checkers" (list "--checkers=csslint" local-file))))
+(add-hook 'js-mode-hook 'flymake-jslint-load)
 
-  (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.css\\'" flymake-csscheckers-init)))
-
-(add-hook 'css-mode-hook
-          (lambda ()
-            (unless (eq buffer-file-name nil) (flymake-mode 1))
-            (local-set-key [f2] 'flymake-goto-prev-error)
-            (local-set-key [f3] 'flymake-goto-next-error)))
-
-;===============================================================================
+;;----------------------------------------------------------------------------=
 
 (require 'haml-mode)
 (require 'sass-mode)
 
-;-------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
 
 (setq scss-compile-at-save nil)
 (autoload 'scss-mode "scss-mode")
@@ -179,7 +175,7 @@
 (add-hook 'scss-mode
           (set (make-local-variable 'tab-width) 2))
 
-;===============================================================================
+;;------------------------------------------------------------------------------
 
 (require 'coffee-mode)
 
@@ -191,19 +187,13 @@
 (add-hook 'coffee-mode-hook
           '(lambda() (coffee-custom)))
 
-;===============================================================================
+;;------------------------------------------------------------------------------
 
-(require 'yasnippet)
-(yas/initialize)
+(load-theme 'zenburn t)
 
-;===============================================================================
+;;------------------------------------------------------------------------------
 
-(require 'color-theme-zenburn)
-(color-theme-zenburn)
-
-;===============================================================================
-
-; http://nschum.de/src/emacs/full-ack/
+;; http://nschum.de/src/emacs/full-ack/
 
 (autoload 'ack-same "full-ack" nil t)
 (autoload 'ack "full-ack" nil t)

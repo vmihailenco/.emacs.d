@@ -1,0 +1,11 @@
+Notes
+=====
+
+- Run::
+
+    sudo pip install -r requirements.txt
+
+- Pymacs should be installed manually::
+
+    cd vendor/Pymacs
+    sudo make install
