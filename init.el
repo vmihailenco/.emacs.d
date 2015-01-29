@@ -1,6 +1,6 @@
 (require 'package)
 (add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/") t)
+  '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize)
 
 ;;
@@ -10,25 +10,25 @@
 
 ;; Add in your own as you wish:
 (defvar my-packages '(
-                      starter-kit
-                      starter-kit-lisp
-                      starter-kit-js
-                      starter-kit-bindings
-                      starter-kit-eshell
+  starter-kit
+  starter-kit-lisp
+  starter-kit-js
+  starter-kit-bindings
+  starter-kit-eshell
 
-                      zenburn-theme
+  zenburn-theme
 
-                      coffee-mode
-                      flymake-coffee
-                      sass-mode
-                      scss-mode
-                      less-css-mode
+  go-mode
+  coffee-mode
+  flymake-coffee
+  sass-mode
+  scss-mode
+  less-css-mode
 
-                      yasnippet
-                      full-ack
-                      expand-region
-                      autopair
-                      )
+  full-ack
+  expand-region
+  autopair
+  )
   "A list of packages to ensure are installed at launch.")
 
 (dolist (p my-packages)
@@ -50,6 +50,7 @@
 
 ;; disable auto wrapping
 (add-hook 'html-mode-hook '(lambda () (auto-fill-mode 0)))
+(remove-hook 'text-mode-hook 'turn-on-auto-fill)
 
 ;-------------------------------------------------------------------------------
 
@@ -89,10 +90,10 @@
 
 ;;------------------------------------------------------------------------------
 
-(add-to-list 'load-path "~/.emacs.d/vendor/go-mode.el")
 (require 'go-mode)
 
-(add-hook 'before-save-hook #'gofmt-before-save)
+(setq gofmt-command "goimports")
+(add-hook 'before-save-hook 'gofmt-before-save)
 
 (add-to-list 'load-path "~/workspace/gocode/src/github.com/dougm/goflymake")
 (require 'go-flymake)
