@@ -42,6 +42,9 @@
 (setq auto-save-default nil)
 (set-default-font "Consolas-11")
 
+(setq initial-major-mode 'text-mode)
+(setq initial-scratch-message nil)
+
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 (setq-default whitespace-style '(face trailing lines empty indentation::space))
