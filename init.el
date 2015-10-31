@@ -10,12 +10,7 @@
 
 ;; Add in your own as you wish:
 (defvar my-packages '(
-  starter-kit
-  starter-kit-lisp
-  starter-kit-js
-  starter-kit-bindings
-  starter-kit-eshell
-
+  better-defaults
   zenburn-theme
 
   go-mode
@@ -25,6 +20,7 @@
   scss-mode
   less-css-mode
 
+  magit
   full-ack
   expand-region
   autopair
@@ -37,6 +33,9 @@
 
 ;-------------------------------------------------------------------------------
 
+(require 'better-defaults)
+
+(setq inhibit-splash-screen t)
 (setq tab-width 4)
 (setq default-tab-width 4)
 (setq auto-save-default nil)
@@ -74,17 +73,13 @@
 
 ;;------------------------------------------------------------------------------
 
-(require 'expand-region)
-(global-set-key (kbd "C-=") 'er/expand-region)
+(require 'magit)
+(global-set-key (kbd "C-x g") 'magit-status)
 
 ;;------------------------------------------------------------------------------
 
-(add-to-list 'load-path "~/.emacs.d/vendor/projutils.el.d")
-(require 'projutils)
-(projutils-global-mode 1)
-(setq projutils-grep-use-ack nil)
-(setq-default projutils-ffip-allowed-file-extensions
-              '("txt" "py" "html" "js" "css" "coffee" "sass" "scss" "less" "go"))
+(require 'expand-region)
+(global-set-key (kbd "C-=") 'er/expand-region)
 
 ;;------------------------------------------------------------------------------
 
@@ -100,71 +95,6 @@
 
 (add-to-list 'load-path "~/workspace/gocode/src/github.com/dougm/goflymake")
 (require 'go-flymake)
-
-;;------------------------------------------------------------------------------
-
-(add-to-list 'load-path "~/.emacs.d/vendor/Pymacs")
-
-(autoload 'pymacs-apply "pymacs")
-(autoload 'pymacs-call "pymacs")
-(autoload 'pymacs-eval "pymacs" nil t)
-(autoload 'pymacs-exec "pymacs" nil t)
-(autoload 'pymacs-load "pymacs" nil t)
-(autoload 'pymacs-autoload "pymacs")
-
-;;------------------------------------------------------------------------------
-
-;; (require 'pymacs)
-;; (pymacs-load "ropemacs" "rope-")
-
-;;------------------------------------------------------------------------------
-
-(add-to-list 'load-path "~/.emacs.d/vendor/python.el.d")
-(require 'python)
-
-(add-hook 'python-mode-hook
-          (lambda ()
-            (setq imenu-create-index-function 'python-imenu-create-index)))
-
-(add-hook 'python-mode-hook 'esk-local-column-number-mode)
-(add-hook 'python-mode-hook 'esk-local-comment-auto-fill)
-(add-hook 'python-mode-hook 'esk-turn-on-hl-line-mode)
-(add-hook 'python-mode-hook 'esk-turn-on-save-place-mode)
-(add-hook 'python-mode-hook 'esk-pretty-lambdas)
-(add-hook 'python-mode-hook 'esk-add-watchwords)
-(add-hook 'python-mode-hook 'esk-turn-on-idle-highlight-mode)
-
-;;------------------------------------------------------------------------------
-
-; Flymake is implemented as an Emacs minor mode. It runs the syntax check tool
-; (the compiler for C++ files, perl for perl files, etc.) in the background,
-; passing it a temporary copy of the current buffer and parses the output for
-; known error/warning message patterns. Flymake then highlights erroneous lines
-; (that is, lines for which at least one error or warning has been reported),
-; and displays an overall buffer status in the mode line, as shown on the figure
-; below.
-
-(when (load "flymake" t)
-  (defun flymake-pycheckers-init ()
-    (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))
-           (local-file (file-relative-name
-                        temp-file
-                        (file-name-directory buffer-file-name))))
-      (list "~/.emacs.d/bin/checkers" (list "--checkers=pep8,pyflakes" local-file))))
-
-  (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.py\\'" flymake-pycheckers-init)))
-
-(add-hook 'python-mode-hook
-          (lambda ()
-            (unless (eq buffer-file-name nil) (flymake-mode 1))
-            (local-set-key [f2] 'flymake-goto-prev-error)
-            (local-set-key [f3] 'flymake-goto-next-error)))
-
-;;----------------------------------------------------------------------------=
-
-(add-hook 'js-mode-hook 'flymake-jslint-load)
 
 ;;----------------------------------------------------------------------------=
 
@@ -196,10 +126,3 @@
 (load-theme 'zenburn t)
 
 ;;------------------------------------------------------------------------------
-
-;; http://nschum.de/src/emacs/full-ack/
-
-(autoload 'ack-same "full-ack" nil t)
-(autoload 'ack "full-ack" nil t)
-(autoload 'ack-find-same-file "full-ack" nil t)
-(autoload 'ack-find-file "full-ack" nil t)
