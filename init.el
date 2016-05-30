@@ -35,6 +35,8 @@
 
 (require 'better-defaults)
 
+(defalias 'yes-or-no-p 'y-or-n-p)
+
 (setq inhibit-splash-screen t)
 (setq tab-width 4)
 (setq default-tab-width 4)
@@ -93,7 +95,7 @@
 (setq gofmt-command "goimports")
 (add-hook 'before-save-hook 'gofmt-before-save)
 
-(add-to-list 'load-path "~/workspace/gocode/src/github.com/dougm/goflymake")
+(add-to-list 'load-path "~/gocode/src/github.com/dougm/goflymake")
 (require 'go-flymake)
 
 ;;----------------------------------------------------------------------------=
