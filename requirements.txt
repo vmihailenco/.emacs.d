@@ -1,5 +1,0 @@
--e hg+https://bitbucket.org/agr/ropemacs#egg=ropemacs
--e hg+https://bitbucket.org/agr/ropemode#egg=ropemod
--e git+https://github.com/pinard/Pymacs.git#egg=pymacs
-pyflakes
-pep8
