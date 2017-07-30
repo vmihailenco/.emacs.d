@@ -1,62 +1,15 @@
-(require 'package)
-(add-to-list 'package-archives
-  '("melpa" . "http://melpa.milkbox.net/packages/") t)
-(package-initialize)
-
-;;
-
-(when (not package-archive-contents)
-  (package-refresh-contents))
-
-;; Add in your own as you wish:
-(defvar my-packages '(
-  better-defaults
-  zenburn-theme
-
-  go-mode
-  coffee-mode
-  flymake-coffee
-  sass-mode
-  scss-mode
-  less-css-mode
-
-  magit
-  full-ack
-  expand-region
-  autopair
-  )
-  "A list of packages to ensure are installed at launch.")
-
-(dolist (p my-packages)
-  (when (not (package-installed-p p))
-    (package-install p)))
-
-;-------------------------------------------------------------------------------
-
-(require 'better-defaults)
+(setq inhibit-splash-screen t)
+(setq-default tab-width 3)
+(setq auto-save-default nil)
+(set-frame-font "Consolas-11")
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(setq inhibit-splash-screen t)
-(setq tab-width 4)
-(setq default-tab-width 4)
-(setq auto-save-default nil)
-(set-default-font "Consolas-11")
-
 (setq initial-major-mode 'text-mode)
 (setq initial-scratch-message nil)
+(electric-pair-mode 1)
 
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
-
-(setq-default whitespace-style '(face trailing lines empty indentation::space))
-(setq-default whitespace-line-column 80)
-(global-whitespace-mode t)
-
-;; disable auto wrapping
-(add-hook 'html-mode-hook '(lambda () (auto-fill-mode 0)))
-(remove-hook 'text-mode-hook 'turn-on-auto-fill)
-
-;-------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
 
 ;; automatically save buffers associated with files on buffer switch
 ;; and on windows switch
@@ -75,56 +28,121 @@
 
 ;;------------------------------------------------------------------------------
 
-(require 'magit)
-(global-set-key (kbd "C-x g") 'magit-status)
+(setq-default whitespace-style '(face trailing lines empty indentation::space))
+(setq-default whitespace-line-column 80)
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+(global-whitespace-mode t)
 
 ;;------------------------------------------------------------------------------
 
-(require 'expand-region)
-(global-set-key (kbd "C-=") 'er/expand-region)
+(require 'package)
+(setq package-enable-at-startup nil)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
 
-;;------------------------------------------------------------------------------
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+(package-install 'use-package))
 
-(require 'autopair)
-(autopair-global-mode)
+;-------------------------------------------------------------------------------
 
-;;------------------------------------------------------------------------------
+(use-package better-defaults
+  :ensure t)
 
-(require 'go-mode)
 
-(setq gofmt-command "goimports")
-(add-hook 'before-save-hook 'gofmt-before-save)
+(use-package zenburn-theme
+  :ensure t
+  :config (load-theme 'zenburn t))
 
-(add-to-list 'load-path "~/gocode/src/github.com/dougm/goflymake")
-(require 'go-flymake)
 
-;;----------------------------------------------------------------------------=
+(use-package ag
+  :ensure t
+  :commands (ag ag-regexp ag-project))
 
-(require 'haml-mode)
-(require 'sass-mode)
 
-;;------------------------------------------------------------------------------
+(use-package magit
+  :ensure t
+  :defer 3
+  :bind (("C-x g" . magit-status)))
 
-(setq scss-compile-at-save nil)
-(autoload 'scss-mode "scss-mode")
-(add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
-(add-hook 'scss-mode
-          (set (make-local-variable 'tab-width) 2))
 
-;;------------------------------------------------------------------------------
+(use-package flycheck
+  :ensure t
+  :defer 3
+  :config (global-flycheck-mode 1))
 
-(require 'coffee-mode)
 
-; set tab-width = 2 special for coffeescript
-(defun coffee-custom ()
-  "coffee-mode-hook"
-  (set (make-local-variable 'tab-width) 2))
+(use-package markdown-mode
+  :ensure t
+  :commands
+  (markdown-mode gfm-mode)
+  :mode
+  ("README\\.md\\'" . gfm-mode)
+  ("\\.md\\'" . markdown-mode)
+  ("\\.markdown\\'" . markdown-mode)
+  :init
+  (setq markdown-command "multimarkdown"))
 
-(add-hook 'coffee-mode-hook
-          '(lambda() (coffee-custom)))
 
-;;------------------------------------------------------------------------------
+(use-package expand-region
+  :ensure t
+  :bind ("C-=" . er/expand-region))
 
-(load-theme 'zenburn t)
 
-;;------------------------------------------------------------------------------
+(use-package go-mode
+  :ensure t
+  :mode ("\\.go\\'" . go-mode)
+  :init (setq gofmt-command "goimports")
+  :config (add-hook 'before-save-hook 'gofmt-before-save))
+
+
+
+(use-package meghanada
+  :ensure t
+  :defer 3
+  :init
+  (add-hook 'java-mode-hook
+            (lambda ()
+              (google-set-c-style)
+              (google-make-newline-indent)
+              (meghanada-mode t)
+              (smartparens-mode t)
+              (rainbow-delimiters-mode t)
+              (highlight-symbol-mode t)
+              (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
+  :config
+  (use-package realgud
+    :ensure t)
+  (setq indent-tabs-mode nil)
+  (setq tab-width 2)
+  (setq-default c-basic-offset 2)
+  (setq meghanada-server-remote-debug t)
+  (setq meghanada-javac-xlint "-Xlint:all,-processing")
+  :bind
+  (:map meghanada-mode-map
+        ("C-S-t" . meghanada-switch-testcase)
+        ("M-RET" . meghanada-local-variable)
+        ("C-M-." . helm-imenu)
+        ("M-r" . meghanada-reference)
+        ("M-t" . meghanada-typeinfo)
+        ("C-z" . hydra-meghanada/body))
+  :commands
+  (meghanada-mode))
+
+
+(use-package coffee-mode
+  :ensure t
+  :mode ("\\.coffee\\'" . coffee-mode)
+  :init (setq coffee-tab-width 2))
+
+(use-package web-mode
+  :ensure t
+  :mode (("\\.erb\\'" . web-mode)
+         ("\\.mustache\\'" . web-mode)
+         ("\\.html?\\'" . web-mode)
+         ("\\.php\\'" . web-mode))
+  :config (progn
+            (setq web-mode-markup-indent-offset 2
+                  web-mode-css-indent-offset 2
+                  web-mode-code-indent-offset 2)))
