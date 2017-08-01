@@ -56,8 +56,54 @@
   :config (load-theme 'zenburn t))
 
 
+(use-package highlight-symbol
+  :ensure t
+  :config
+  (setq highlight-symbol-idle-delay 0.5)
+  (add-hook 'prog-mode-hook 'highlight-symbol-mode))
+
+
+(use-package hydra
+  :ensure t)
+
+
+(use-package ivy
+  :ensure t
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-wrap t)
+  (setq enable-recursive-minibuffers t)
+  (global-set-key (kbd "C-c C-r") 'ivy-resume)
+  (global-set-key (kbd "<f6>") 'ivy-resume))
+
+
+(use-package counsel
+  :ensure t
+  :config
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+  (global-set-key (kbd "<f1> f") 'counsel-describe-function)
+  (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+  (global-set-key (kbd "<f1> l") 'counsel-find-library)
+  (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+  (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+  (global-set-key (kbd "C-c g") 'counsel-git)
+  (global-set-key (kbd "C-c j") 'counsel-git-grep)
+  (global-set-key (kbd "C-c k") 'counsel-ag)
+  (global-set-key (kbd "C-x l") 'counsel-locate)
+  (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+  (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
+
+
+(use-package swiper
+  :ensure t
+  :config
+  (global-set-key "\C-s" 'swiper))
+
 (use-package ag
   :ensure t
+  :defer t
   :commands (ag ag-regexp ag-project))
 
 
@@ -87,6 +133,7 @@
 
 (use-package expand-region
   :ensure t
+  :defer t
   :bind ("C-=" . er/expand-region))
 
 
@@ -97,26 +144,55 @@
   :config (add-hook 'before-save-hook 'gofmt-before-save))
 
 
+(use-package coffee-mode
+  :ensure t
+  :mode
+  ("\\.coffee\\'" . coffee-mode)
+  :init
+  (setq coffee-tab-width 2))
+
+
+(use-package web-mode
+  :ensure t
+  :mode
+  ("\\.erb\\'" . web-mode)
+  ("\\.mustache\\'" . web-mode)
+  ("\\.html?\\'" . web-mode)
+  ("\\.php\\'" . web-mode)
+  :config
+  (progn
+    (setq web-mode-markup-indent-offset 2
+          web-mode-css-indent-offset 2
+          web-mode-code-indent-offset 2)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package autodisass-java-bytecode
+  :ensure t
+  :defer t)
+
+(use-package google-c-style
+  :defer t
+  :ensure t
+  :commands
+  (google-set-c-style))
 
 (use-package meghanada
-  :ensure t
-  :defer 3
+  :defer t
   :init
   (add-hook 'java-mode-hook
             (lambda ()
               (google-set-c-style)
               (google-make-newline-indent)
               (meghanada-mode t)
-              (smartparens-mode t)
-              (rainbow-delimiters-mode t)
-              (highlight-symbol-mode t)
               (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
+
   :config
   (use-package realgud
     :ensure t)
   (setq indent-tabs-mode nil)
   (setq tab-width 2)
-  (setq-default c-basic-offset 2)
+  (setq c-basic-offset 2)
   (setq meghanada-server-remote-debug t)
   (setq meghanada-javac-xlint "-Xlint:all,-processing")
   :bind
@@ -130,19 +206,52 @@
   :commands
   (meghanada-mode))
 
+(defhydra hydra-meghanada (:hint nil :exit t)
+"
+^Edit^                           ^Tast or Task^
+^^^^^^-------------------------------------------------------
+_f_: meghanada-compile-file      _m_: meghanada-restart
+_c_: meghanada-compile-project   _t_: meghanada-run-task
+_o_: meghanada-optimize-import   _j_: meghanada-run-junit-test-case
+_s_: meghanada-switch-test-case  _J_: meghanada-run-junit-class
+_v_: meghanada-local-variable    _R_: meghanada-run-junit-recent
+_i_: meghanada-import-all        _r_: meghanada-reference
+_g_: magit-status                _T_: meghanada-typeinfo
+_l_: helm-ls-git-ls
+"
+  ("f" meghanada-compile-file)
+  ("m" meghanada-restart)
 
-(use-package coffee-mode
-  :ensure t
-  :mode ("\\.coffee\\'" . coffee-mode)
-  :init (setq coffee-tab-width 2))
+  ("c" meghanada-compile-project)
+  ("o" meghanada-optimize-import)
+  ("s" meghanada-switch-test-case)
+  ("v" meghanada-local-variable)
+  ("i" meghanada-import-all)
 
-(use-package web-mode
-  :ensure t
-  :mode (("\\.erb\\'" . web-mode)
-         ("\\.mustache\\'" . web-mode)
-         ("\\.html?\\'" . web-mode)
-         ("\\.php\\'" . web-mode))
-  :config (progn
-            (setq web-mode-markup-indent-offset 2
-                  web-mode-css-indent-offset 2
-                  web-mode-code-indent-offset 2)))
+  ("g" magit-status)
+  ("l" helm-ls-git-ls)
+
+  ("t" meghanada-run-task)
+  ("T" meghanada-typeinfo)
+  ("j" meghanada-run-junit-test-case)
+  ("J" meghanada-run-junit-class)
+  ("R" meghanada-run-junit-recent)
+  ("r" meghanada-reference)
+
+  ("z" nil "leave"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (google-c-style autodisass-java-bytecode zenburn-theme web-mode use-package realgud meghanada markdown-mode magit hydra go-mode expand-region coffee-mode better-defaults ag))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
