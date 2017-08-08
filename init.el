@@ -1,3 +1,5 @@
+(setq gc-cons-threshold 20000000)
+
 (setq inhibit-splash-screen t)
 (setq-default tab-width 3)
 (setq auto-save-default nil)
@@ -63,54 +65,45 @@
   (add-hook 'prog-mode-hook 'highlight-symbol-mode))
 
 
-(use-package hydra
-  :ensure t)
-
-
-(use-package ivy
-  :ensure t
-  :config
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-wrap t)
-  (setq enable-recursive-minibuffers t)
-  (global-set-key (kbd "C-c C-r") 'ivy-resume)
-  (global-set-key (kbd "<f6>") 'ivy-resume))
-
-
-(use-package counsel
-  :ensure t
-  :config
-  (global-set-key (kbd "M-x") 'counsel-M-x)
-  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-  (global-set-key (kbd "<f1> f") 'counsel-describe-function)
-  (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
-  (global-set-key (kbd "<f1> l") 'counsel-find-library)
-  (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
-  (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
-  (global-set-key (kbd "C-c g") 'counsel-git)
-  (global-set-key (kbd "C-c j") 'counsel-git-grep)
-  (global-set-key (kbd "C-c k") 'counsel-ag)
-  (global-set-key (kbd "C-x l") 'counsel-locate)
-  (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
-  (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
-
-
-(use-package swiper
-  :ensure t
-  :config
-  (global-set-key "\C-s" 'swiper))
-
 (use-package ag
   :ensure t
   :defer t
   :commands (ag ag-regexp ag-project))
 
 
+(use-package smex
+  :ensure t
+  :config
+  (global-set-key (kbd "M-x") 'smex))
+
+
+(use-package flx-ido
+  :ensure t
+  :init
+  (flx-ido-mode 1)
+  (setq ido-enable-flex-matching t)
+  (setq ido-use-faces nil))
+
+
+(use-package ido-ubiquitous
+  :ensure t
+  :config
+  (ido-ubiquitous-mode 1))
+
+
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-mode))
+
+
 (use-package magit
   :ensure t
   :defer 3
-  :bind (("C-x g" . magit-status)))
+  :bind
+  ("C-x g" . magit-status)
+  :config
+  (setq magit-completing-read-function 'magit-ido-completing-read))
 
 
 (use-package flycheck
@@ -179,6 +172,7 @@
 
 (use-package meghanada
   :defer t
+  :ensure t
   :init
   (add-hook 'java-mode-hook
             (lambda ()
@@ -202,45 +196,8 @@
         ("C-M-." . helm-imenu)
         ("M-r" . meghanada-reference)
         ("M-t" . meghanada-typeinfo)
-        ("C-z" . hydra-meghanada/body))
   :commands
-  (meghanada-mode))
-
-(defhydra hydra-meghanada (:hint nil :exit t)
-"
-^Edit^                           ^Tast or Task^
-^^^^^^-------------------------------------------------------
-_f_: meghanada-compile-file      _m_: meghanada-restart
-_c_: meghanada-compile-project   _t_: meghanada-run-task
-_o_: meghanada-optimize-import   _j_: meghanada-run-junit-test-case
-_s_: meghanada-switch-test-case  _J_: meghanada-run-junit-class
-_v_: meghanada-local-variable    _R_: meghanada-run-junit-recent
-_i_: meghanada-import-all        _r_: meghanada-reference
-_g_: magit-status                _T_: meghanada-typeinfo
-_l_: helm-ls-git-ls
-"
-  ("f" meghanada-compile-file)
-  ("m" meghanada-restart)
-
-  ("c" meghanada-compile-project)
-  ("o" meghanada-optimize-import)
-  ("s" meghanada-switch-test-case)
-  ("v" meghanada-local-variable)
-  ("i" meghanada-import-all)
-
-  ("g" magit-status)
-  ("l" helm-ls-git-ls)
-
-  ("t" meghanada-run-task)
-  ("T" meghanada-typeinfo)
-  ("j" meghanada-run-junit-test-case)
-  ("J" meghanada-run-junit-class)
-  ("R" meghanada-run-junit-recent)
-  ("r" meghanada-reference)
-
-  ("z" nil "leave"))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (meghanada-mode)))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -248,7 +205,7 @@ _l_: helm-ls-git-ls
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (google-c-style autodisass-java-bytecode zenburn-theme web-mode use-package realgud meghanada markdown-mode magit hydra go-mode expand-region coffee-mode better-defaults ag))))
+    (meghanada zenburn-theme web-mode use-package realgud markdown-mode magit highlight-symbol google-c-style go-mode flycheck expand-region coffee-mode better-defaults autodisass-java-bytecode ag))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
