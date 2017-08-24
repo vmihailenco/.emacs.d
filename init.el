@@ -85,7 +85,7 @@
   (setq ido-use-faces nil))
 
 
-(use-package ido-ubiquitous
+(use-package ido-completing-read+
   :ensure t
   :config
   (ido-ubiquitous-mode 1))
@@ -133,8 +133,10 @@
 (use-package go-mode
   :ensure t
   :mode ("\\.go\\'" . go-mode)
-  :init (setq gofmt-command "goimports")
-  :config (add-hook 'before-save-hook 'gofmt-before-save))
+  :init
+  (setq gofmt-command "goimports")
+  :config
+  (add-hook 'before-save-hook 'gofmt-before-save))
 
 
 (use-package coffee-mode
@@ -143,6 +145,12 @@
   ("\\.coffee\\'" . coffee-mode)
   :init
   (setq coffee-tab-width 2))
+
+
+(use-package typescript-mode
+  :ensure t
+  :mode
+  ("\\.ts\\'" . typescript-mode))
 
 
 (use-package web-mode
