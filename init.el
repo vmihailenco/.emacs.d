@@ -3,13 +3,19 @@
 (setq inhibit-splash-screen t)
 (setq-default tab-width 3)
 (setq auto-save-default nil)
-(set-frame-font "Consolas-11")
+(set-frame-font "Source Code Pro Medium-11")
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 (setq initial-major-mode 'text-mode)
 (setq initial-scratch-message nil)
 (electric-pair-mode 1)
+(add-hook 'dired-mode-hook 'dired-hide-details-mode)
+
+(setq python-shell-interpreter "python3.6")
+(defvaralias 'flycheck-python-pylint-executable 'python-shell-interpreter)
+
+(setq js-indent-level 2)
 
 ;;------------------------------------------------------------------------------
 
@@ -41,7 +47,6 @@
 (setq package-enable-at-startup nil)
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/"))
-(package-initialize)
 
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
@@ -53,9 +58,15 @@
   :ensure t)
 
 
-(use-package zenburn-theme
+(use-package base16-theme
   :ensure t
-  :config (load-theme 'zenburn t))
+  :config (load-theme 'base16-eighties t))
+
+
+(use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode 1))
 
 
 (use-package highlight-symbol
@@ -150,7 +161,9 @@
 (use-package typescript-mode
   :ensure t
   :mode
-  ("\\.ts\\'" . typescript-mode))
+  ("\\.ts\\'" . typescript-mode)
+  :init
+  (setq typescript-indent-level 2))
 
 
 (use-package web-mode
@@ -159,12 +172,44 @@
   ("\\.erb\\'" . web-mode)
   ("\\.mustache\\'" . web-mode)
   ("\\.html?\\'" . web-mode)
-  ("\\.php\\'" . web-mode)
   :config
   (progn
     (setq web-mode-markup-indent-offset 2
           web-mode-css-indent-offset 2
           web-mode-code-indent-offset 2)))
+
+
+(use-package php-mode
+  :ensure t
+  :mode
+  ("\\.php\\'" . php-mode))
+
+
+(use-package vue-mode
+  :ensure t
+  :mode
+  ("\\.vue\\'" . vue-mode))
+
+
+(use-package pug-mode
+  :ensure t
+  :mode
+  ("\\.pug\\'" . pug-mode)
+  :init
+  (setq pug-tab-width 2))
+
+
+(use-package prettier-js
+  :ensure t
+  :init
+  :config
+  (add-hook 'js-mode-hook 'prettier-js-mode)
+  (add-hook 'vue-mode-hook 'prettier-js-mode)
+  (setq prettier-js-args '(
+                           "--no-semi"
+                           "--single-quote"
+                           "--trailing-comma" "es5"
+                           "--arrow-parens" "always")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -197,23 +242,15 @@
   (setq c-basic-offset 2)
   (setq meghanada-server-remote-debug t)
   (setq meghanada-javac-xlint "-Xlint:all,-processing")
-  :bind
-  (:map meghanada-mode-map
-        ("C-S-t" . meghanada-switch-testcase)
-        ("M-RET" . meghanada-local-variable)
-        ("C-M-." . helm-imenu)
-        ("M-r" . meghanada-reference)
-        ("M-t" . meghanada-typeinfo)
   :commands
-  (meghanada-mode)))
+  (meghanada-mode))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   (quote
-    (meghanada zenburn-theme web-mode use-package realgud markdown-mode magit highlight-symbol google-c-style go-mode flycheck expand-region coffee-mode better-defaults autodisass-java-bytecode ag))))
+   '(zenburn-theme web-mode use-package typescript-mode smex realgud projectile php-mode molokai-theme meghanada markdown-mode magit ido-ubiquitous highlight-symbol google-c-style go-mode flx-ido expand-region dracula-theme diminish color-theme-sanityinc-tomorrow coffee-mode better-defaults base16-theme autodisass-java-bytecode ag)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
