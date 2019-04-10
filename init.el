@@ -120,7 +120,10 @@
 (use-package flycheck
   :ensure t
   :defer 3
-  :config (global-flycheck-mode 1))
+  :config (global-flycheck-mode 1)
+  (add-hook 'go-mode-hook
+            (lambda ()
+              (setq flycheck-disabled-checkers '(go-vet)))))
 
 
 (use-package markdown-mode
@@ -185,6 +188,22 @@
   ("\\.php\\'" . php-mode))
 
 
+(use-package mmm-mode
+  :ensure t)
+
+
+(use-package vue-html-mode
+  :ensure t)
+
+
+(use-package ssass-mode
+  :ensure t)
+
+
+(use-package edit-indirect
+  :ensure t)
+
+
 (use-package vue-mode
   :ensure t
   :mode
@@ -201,15 +220,15 @@
 
 (use-package prettier-js
   :ensure t
-  :init
   :config
   (add-hook 'js-mode-hook 'prettier-js-mode)
   (add-hook 'vue-mode-hook 'prettier-js-mode)
-  (setq prettier-js-args '(
-                           "--no-semi"
-                           "--single-quote"
-                           "--trailing-comma" "es5"
-                           "--arrow-parens" "always")))
+  (add-hook 'typescript-mode-hook 'prettier-js-mode))
+
+(use-package blacken
+  :ensure t
+  :config
+  (add-hook 'python-mode-hook 'blacken-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
