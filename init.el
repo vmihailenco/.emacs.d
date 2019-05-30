@@ -36,9 +36,13 @@
 
 ;;------------------------------------------------------------------------------
 
+(defun my-delete-trailing-whitespace ()
+  (when (not (string= (file-name-extension buffer-file-name) "http"))
+    (delete-trailing-whitespace)))
+
 (setq-default whitespace-style '(face trailing lines empty indentation::space))
 (setq-default whitespace-line-column 80)
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'before-save-hook 'my-delete-trailing-whitespace)
 (global-whitespace-mode t)
 
 ;;------------------------------------------------------------------------------
