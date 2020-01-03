@@ -9,7 +9,6 @@
 
 (setq initial-major-mode 'text-mode)
 (setq initial-scratch-message nil)
-(electric-pair-mode 1)
 (add-hook 'dired-mode-hook 'dired-hide-details-mode)
 
 (setq python-shell-interpreter "python3.6")
@@ -52,6 +51,8 @@
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/"))
 
+(package-initialize)
+
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
 (package-install 'use-package))
@@ -62,9 +63,29 @@
   :ensure t)
 
 
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
+
+
 (use-package base16-theme
   :ensure t
   :config (load-theme 'base16-eighties t))
+
+
+(use-package smartparens
+  :ensure t
+  :init
+  (use-package smartparens-config)
+  (use-package smartparens-python)
+  (use-package smartparens-html)
+  (use-package smartparens-markdown)
+  (use-package smartparens-javascript)
+  (smartparens-global-mode 1)
+  (show-smartparens-global-mode 1)
+  :config
+  (setq smartparens-strict-mode t))
 
 
 (use-package editorconfig
@@ -109,7 +130,8 @@
 (use-package projectile
   :ensure t
   :config
-  (projectile-mode))
+  (projectile-mode)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 
 
 (use-package magit
@@ -124,10 +146,7 @@
 (use-package flycheck
   :ensure t
   :defer 3
-  :config (global-flycheck-mode 1)
-  (add-hook 'go-mode-hook
-            (lambda ()
-              (setq flycheck-disabled-checkers '(go-vet)))))
+  :config (global-flycheck-mode 1))
 
 
 (use-package markdown-mode
@@ -140,6 +159,11 @@
   ("\\.markdown\\'" . markdown-mode)
   :init
   (setq markdown-command "multimarkdown"))
+
+
+(use-package yaml-mode
+  :ensure t
+  :mode ("\\.ya?ml\\'" . yaml-mode))
 
 
 (use-package expand-region
@@ -155,6 +179,12 @@
   (setq gofmt-command "goimports")
   :config
   (add-hook 'before-save-hook 'gofmt-before-save))
+
+
+(use-package flycheck-golangci-lint
+  :ensure t
+  :hook (go-mode . flycheck-golangci-lint-setup)
+  :init)
 
 
 (use-package coffee-mode
@@ -193,15 +223,19 @@
 
 
 (use-package mmm-mode
-  :ensure t)
+  :ensure t
+  :init
+  (setq mmm-js-mode-enter-hook (lambda () (setq syntax-ppss-table nil)))
+  (setq mmm-typescript-mode-enter-hook (lambda () (setq syntax-ppss-table nil))))
 
 
 (use-package vue-html-mode
   :ensure t)
 
 
-(use-package ssass-mode
-  :ensure t)
+(use-package css-mode
+  :init
+  (setq css-indent-offset 2))
 
 
 (use-package edit-indirect
@@ -222,17 +256,91 @@
   (setq pug-tab-width 2))
 
 
+(use-package scss-mode
+  :ensure t
+  :mode
+  ("\\.scss\\'" . scss-mode))
+
 (use-package prettier-js
   :ensure t
   :config
   (add-hook 'js-mode-hook 'prettier-js-mode)
   (add-hook 'vue-mode-hook 'prettier-js-mode)
-  (add-hook 'typescript-mode-hook 'prettier-js-mode))
+  (add-hook 'typescript-mode-hook 'prettier-js-mode)
+  (add-hook 'scss-mode-hook 'prettier-js-mode)
+  (add-hook 'xml-hook 'prettier-js-mode)
+  :init
+  (setq prettier-js-args '("--trailing-comma" "all")))
 
 (use-package blacken
   :ensure t
   :config
   (add-hook 'python-mode-hook 'blacken-mode))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package lsp-mode
+  :ensure t
+  :commands (lsp lsp-deferred)
+  :hook (go-mode . lsp-deferred))
+
+;; Set up before-save hooks to format buffer and add/delete imports.
+;; Make sure you don't have other gofmt/goimports hooks enabled.
+(defun lsp-go-install-save-hooks ()
+  (add-hook 'before-save-hook #'lsp-format-buffer t t)
+  (add-hook 'before-save-hook #'lsp-organize-imports t t))
+(add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+
+;; Optional - provides fancier overlays.
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+
+;; Company mode is a standard completion package that works well with lsp-mode.
+(use-package company
+  :ensure t
+  :config
+  ;; Optionally enable completion-as-you-type behavior.
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 1))
+
+;; company-lsp integrates company mode completion with lsp-mode.
+;; completion-at-point also works out of the box but doesn't support snippets.
+(use-package company-lsp
+  :ensure t
+  :commands company-lsp)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package hydra
+  :ensure t)
+
+(defhydra hydra-lsp (:exit t :hint nil)
+  "
+ Buffer^^               Server^^                   Symbol
+-------------------------------------------------------------------------------------
+ [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
+ [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
+ [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature"
+  ("d" lsp-find-declaration)
+  ("D" lsp-ui-peek-find-definitions)
+  ("R" lsp-ui-peek-find-references)
+  ("i" lsp-ui-peek-find-implementation)
+  ("t" lsp-find-type-definition)
+  ("s" lsp-signature-help)
+  ("o" lsp-describe-thing-at-point)
+  ("r" lsp-rename)
+
+  ("f" lsp-format-buffer)
+  ("m" lsp-ui-imenu)
+  ("x" lsp-execute-code-action)
+
+  ("M-s" lsp-describe-session)
+  ("M-r" lsp-workspace-restart)
+  ("S" lsp-workspace-shutdown))
+
+(global-unset-key (kbd "C-z"))
+(global-set-key (kbd "C-z l") 'hydra-lsp/body)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -267,16 +375,5 @@
   (setq meghanada-javac-xlint "-Xlint:all,-processing")
   :commands
   (meghanada-mode))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(zenburn-theme web-mode use-package typescript-mode smex realgud projectile php-mode molokai-theme meghanada markdown-mode magit ido-ubiquitous highlight-symbol google-c-style go-mode flx-ido expand-region dracula-theme diminish color-theme-sanityinc-tomorrow coffee-mode better-defaults base16-theme autodisass-java-bytecode ag)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
