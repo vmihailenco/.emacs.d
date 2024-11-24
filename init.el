@@ -1,17 +1,43 @@
-(setq gc-cons-threshold 100000000)
+(use-package better-defaults)
 
-(setq inhibit-splash-screen t)
+;; default mode for the *scratch* buffer
+(setq initial-major-mode 'fundamental-mode)
+
+;;------------------------------------------------------------------------------
+
+;; which-key: shows a popup of available keybindings when typing a long key
+;; sequence (e.g. C-x ...)
+(use-package which-key
+  :diminish
+  :config
+  (which-key-mode))
+
+;; Show the help buffer after startup
+(add-hook 'after-init-hook 'help-quick)
+
+;; (use-package base16-theme
+;;   :config
+;;   (load-theme 'base16-eighties t))
+
+(use-package emacs
+  :config
+  (load-theme 'modus-vivendi))
+
+;;------------------------------------------------------------------------------
+
+;; Automatically reread from disk if the underlying file changes
+(setq auto-revert-avoid-polling t)
+(setq auto-revert-interval 5)
+(setq auto-revert-check-vc-info t)
+(global-auto-revert-mode)
+
+;;------------------------------------------------------------------------------
+
 (setq-default tab-width 3)
 (set-frame-font "Source Code Pro Medium-11")
 
-;; don't create lock files
-(setq create-lockfiles nil)
-;;(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
-
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(setq initial-major-mode 'text-mode)
-(setq initial-scratch-message nil)
 (add-hook 'dired-mode-hook 'dired-hide-details-mode)
 (electric-pair-mode 1)
 
@@ -93,45 +119,38 @@
   :after flyspell
   :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
 
-(use-package flyspell-correct-ivy
-  :after flyspell-correct)
-
 ;-------------------------------------------------------------------------------
 
-(use-package ivy
-  :defer t
+;; (use-package smex
+;;   :config
+;;   (global-set-key (kbd "M-x") 'smex))
+
+;; (use-package flx-ido
+;;   :init
+;;   (flx-ido-mode 1)
+;;   (setq ido-enable-flex-matching t)
+;;   (setq ido-use-faces nil))
+
+
+;; (use-package ido-completing-read+
+;;   :config
+;;   (ido-ubiquitous-mode 1))
+
+(use-package helm
   :diminish
+  :init
+  (setq helm-mode-fuzzy-match t
+        helm-completion-in-region-fuzzy-match t)
   :config
-  (ivy-mode))
-
-(use-package counsel
-  :after ivy
-  :diminish
-  :config (counsel-mode))
-
-(use-package ivy-rich
-  :hook (counsel-mode . ivy-rich-mode))
-
-(use-package swiper
-  :after ivy
-  :bind (("C-s" . swiper)
-         ("C-r" . swiper)))
+  (helm-mode 1)
+  :bind (("M-x" . helm-M-x)
+         ("C-x C-f" . helm-find-files)
+         ("C-x b" . helm-buffers-list)
+         ("C-x c o" . helm-occur)
+         ("M-y" . helm-show-kill-ring)
+         ("C-x r b" . helm-filtered-bookmarks)))
 
 ;-------------------------------------------------------------------------------
-
-(use-package better-defaults)
-
-
-(use-package which-key
-  :diminish
-  :config
-  (which-key-mode))
-
-
- (use-package base16-theme
-   :config
-   (load-theme 'base16-eighties t))
-
 
 (use-package editorconfig
   :diminish
@@ -153,12 +172,14 @@
 (use-package projectile
   :diminish
   :config
-  (projectile-mode)
+  (projectile-mode +1)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 
 
 (use-package magit
   :defer 3
+  :config
+;  (setq magit-completing-read-function 'magit-ido-completing-read)
   :bind
   ("C-x g" . magit-status))
 
@@ -184,8 +205,23 @@
   :mode ("\\.ya?ml\\'" . yaml-mode))
 
 
+(use-package terraform-mode
+  :mode ("\\.tf\\'" . terraform-mode)
+  :custom
+  (terraform-format-on-save t)
+  :config
+  (add-hook 'terraform-mode-hook #'outline-minor-mode))
+
+
 (use-package kotlin-mode
   :mode ("\\.kts\\'" . kotlin-mode))
+
+
+(use-package rust-mode
+  :mode ("\\.rs\\'" . rust-mode)
+  :init
+  (setq indent-tabs-mode nil)
+  (setq rust-format-on-save t))
 
 
 (use-package expand-region
@@ -196,14 +232,14 @@
 (use-package go-mode
   :mode ("\\.go\\'" . go-mode)
   :init
-  (setq gofmt-command "gofumports")
+  (setq gofmt-command "goimports")
   :config
   (add-hook 'before-save-hook 'gofmt-before-save))
 
 
-(use-package flycheck-golangci-lint
-  :hook (go-mode . flycheck-golangci-lint-setup)
-  :init)
+;; (use-package flycheck-golangci-lint
+;;   :hook (go-mode . flycheck-golangci-lint-setup)
+;;   :init)
 
 
 (use-package coffee-mode
